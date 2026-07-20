@@ -7,8 +7,6 @@ export type WalletInfo = {
 
 function findLace(): InitialAPI | undefined {
   const midnight = window.midnight ?? {};
-
-  // Try known key first, then fall back to any available wallet
   return (
     (midnight['mnLace'] as InitialAPI | undefined) ??
     Object.values(midnight).find(Boolean) as InitialAPI | undefined
@@ -27,8 +25,23 @@ export async function connectWallet(): Promise<WalletInfo> {
     );
   }
 
-  const connectedApi = await lace.connect('preprod');
-  const { shieldedAddress } = await connectedApi.getShieldedAddresses();
+  // Try each network in order until one matches the wallet's current network
+  const networks = ['preprod', 'preview', 'undeployed', 'mainnet'];
+  let connectedApi: ConnectedAPI | null = null;
 
+  for (const network of networks) {
+    try {
+      connectedApi = await lace.connect(network);
+      break;
+    } catch {
+      // Try next network
+    }
+  }
+
+  if (!connectedApi) {
+    throw new Error('Could not connect — check your Lace wallet network setting.');
+  }
+
+  const { shieldedAddress } = await connectedApi.getShieldedAddresses();
   return { address: shieldedAddress, connectedApi };
 }
