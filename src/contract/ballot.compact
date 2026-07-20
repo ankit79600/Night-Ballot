@@ -1,0 +1,85 @@
+pragma language_version >= 0.16 && <= 0.25;
+import CompactStandardLibrary;
+
+// =============================================================================
+// Night Ballot — Privacy-preserving on-chain voting
+//
+// PUBLIC LEDGER STATE  ─ visible to anyone on the network:
+//   proposal   : the ballot question text
+//   yesVotes   : running YES tally
+//   noVotes    : running NO tally
+//   isOpen     : 1 = voting open, 0 = voting closed
+//   organizer  : 32-byte hash commitment of the organizer's secret key
+//
+// PRIVATE WITNESS  ─ stays on the prover's machine, NEVER goes on-chain:
+//   organizerKey() : the organizer's secret key
+//     The ZK proof attests "I know a key whose hash matches the on-chain
+//     commitment" without ever revealing the key itself.
+//
+// disclose() USAGE ─ every write to the ledger that derives from a private
+//   witness MUST be wrapped in disclose() so the compiler knows the exposure
+//   is deliberate and not an accidental privacy leak.
+// =============================================================================
+
+// ── Public ledger state ────────────────────────────────────────────────────
+export ledger proposal:  Maybe<Opaque<"string">>;  // The ballot question
+export ledger yesVotes:  Counter;                   // Running YES tally
+export ledger noVotes:   Counter;                   // Running NO tally
+export ledger isOpen:    Field;                     // 1 = open, 0 = closed
+export ledger organizer: Bytes<32>;                 // Hashed organizer commitment
+
+constructor() {
+  proposal = none<Opaque<"string">>();
+  isOpen   = 0 as Field;
+  // yesVotes, noVotes : Counter — default to 0, no init needed
+  // organizer         : Bytes<32> — defaults to 0x00…00
+}
+
+// ── Private witness ────────────────────────────────────────────────────────
+// The organizer's secret. Declared here so the ZK circuit includes it as a
+// constrained input. The value is computed locally, never transmitted.
+witness organizerKey(): Bytes<32>;
+
+// ── Circuits ───────────────────────────────────────────────────────────────
+
+// Opens the ballot by storing the question and the organizer's commitment.
+// disclose() is required for every value derived from the private witness
+// that we intentionally write to the public ledger.
+export circuit openBallot(question: Opaque<"string">): [] {
+  assert(isOpen == (0 as Field), "Ballot is already open");
+  organizer = disclose(ballotKey(organizerKey()));
+  proposal  = disclose(some<Opaque<"string">>(question));
+  isOpen    = disclose(1 as Field);
+}
+
+// Any caller may vote YES while the ballot is open.
+// Counter.increment() writes to public state without disclose() because
+// it is a built-in mutation that does not derive from a private witness.
+export circuit castYes(): [] {
+  assert(isOpen == (1 as Field), "Ballot is not currently open");
+  yesVotes.increment(1);
+}
+
+// Any caller may vote NO while the ballot is open.
+export circuit castNo(): [] {
+  assert(isOpen == (1 as Field), "Ballot is not currently open");
+  noVotes.increment(1);
+}
+
+// Closes the ballot. Requires the caller to prove they know the same
+// organizerKey that was used at openBallot — via ZK proof, not by
+// revealing the key. The key itself is NEVER disclosed.
+export circuit closeBallot(): [] {
+  assert(isOpen == (1 as Field), "Ballot is already closed");
+  assert(
+    organizer == ballotKey(organizerKey()),
+    "Only the original organizer can close this ballot"
+  );
+  isOpen = disclose(0 as Field);
+}
+
+// Returns a deterministic 32-byte commitment derived from a secret key.
+// The commitment can live on-chain; the preimage (secret key) never can.
+export circuit ballotKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "night-ballot:v1"), sk]);
+}
