@@ -26,7 +26,7 @@ export async function connectWallet(): Promise<WalletInfo> {
   }
 
   // Try each network in order until one matches the wallet's current network
-  const networks = ['preprod', 'preview', 'undeployed', 'mainnet'];
+  const networks = ['testnet', 'preprod', 'preview', 'undeployed', 'mainnet'];
   let connectedApi: ConnectedAPI | null = null;
 
   for (const network of networks) {
