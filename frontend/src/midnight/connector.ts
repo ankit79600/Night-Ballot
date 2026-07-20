@@ -6,8 +6,12 @@ export type WalletInfo = {
 };
 
 function findLace(): InitialAPI | undefined {
-  return Object.values(window.midnight ?? {}).find(
-    (w) => w.rdns === 'io.lace.midnight',
+  const midnight = window.midnight ?? {};
+
+  // Try known key first, then fall back to any available wallet
+  return (
+    (midnight['mnLace'] as InitialAPI | undefined) ??
+    Object.values(midnight).find(Boolean) as InitialAPI | undefined
   );
 }
 
@@ -17,7 +21,11 @@ export function isLaceAvailable(): boolean {
 
 export async function connectWallet(): Promise<WalletInfo> {
   const lace = findLace();
-  if (!lace) throw new Error('Lace Midnight wallet not found. Please install the extension.');
+  if (!lace) {
+    throw new Error(
+      'Lace Midnight wallet not found. Make sure the extension is enabled on this site.',
+    );
+  }
 
   const connectedApi = await lace.connect('preprod');
   const { shieldedAddress } = await connectedApi.getShieldedAddresses();
