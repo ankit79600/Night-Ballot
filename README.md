@@ -8,6 +8,7 @@ Voters cast votes without revealing their identity; only the aggregate tally is 
 |---|---|
 | **Live Demo** | [night-ballot-hl7r.vercel.app](https://night-ballot-hl7r.vercel.app/#vote) |
 | **Demo Video** | [youtu.be/eEf-iAOee48](https://youtu.be/eEf-iAOee48) |
+| **Contract Address** | Not deployed — Midnight Preprod faucet has been unavailable since submission date; contract is fully implemented and all circuits pass the test suite |
 
 ---
 
