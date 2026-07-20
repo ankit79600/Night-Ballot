@@ -13,7 +13,7 @@ import {
   Contract,
   ledger,
   type Ledger,
-} from '../../../src/managed/ballot/contract/index.js';
+} from '../contract/index.js';
 
 export type { Ledger };
 
@@ -37,7 +37,7 @@ export class BallotAPI {
 
   constructor(organizerKey: OrganizerKey) {
     this.contract = new Contract({
-      organizerKey: (_ctx) => [null, organizerKey],
+      organizerKey: (_ctx: unknown) => [null, organizerKey],
     });
 
     const init = this.contract.initialState(

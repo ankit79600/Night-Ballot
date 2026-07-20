@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { BallotAPI, type BallotState } from '../midnight/ballot-api';
+export type { BallotState };
 
 const DEFAULT_ORGANIZER_KEY = new Uint8Array(32).fill(0x42);
 
