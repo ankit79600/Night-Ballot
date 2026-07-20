@@ -155,14 +155,7 @@ This runs `compact compile src/contract/ballot.compact src/managed/ballot` and g
 
 Expected output:
 
-```
-circuit "openBallot"   (k=…, rows=…)
-circuit "castYes"      (k=…, rows=…)
-circuit "castNo"       (k=…, rows=…)
-circuit "closeBallot"  (k=…, rows=…)
-circuit "ballotKey"    (k=…, rows=…)
-Overall progress [====================] 5/5
-```
+![Compile output showing circuits](screenshots/compile-output.png)
 
 ### 5. Run the test suite
 
