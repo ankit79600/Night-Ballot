@@ -20,6 +20,7 @@
     "vitest": "^2.0.0"
   },
   "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "^0.16.0",
     "dotenv": "^16.4.0"
   }
 }
