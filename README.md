@@ -4,6 +4,11 @@
 A privacy-preserving on-chain ballot built on [Midnight](https://midnight.network/) using zero-knowledge proofs.  
 Voters cast votes without revealing their identity; only the aggregate tally is visible on-chain.
 
+| | |
+|---|---|
+| **Live Demo** | [night-ballot-hl7r.vercel.app](https://night-ballot-hl7r.vercel.app/#vote) |
+| **Demo Video** | [youtu.be/eEf-iAOee48](https://youtu.be/eEf-iAOee48) |
+
 ---
 
 ## Product Idea
