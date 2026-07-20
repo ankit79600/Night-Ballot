@@ -199,18 +199,6 @@ npm run deploy
 
 ---
 
-## Submission Checklist
-
-- [x] Public GitHub repository with README
-- [x] Setup instructions (this file)
-- [ ] Screenshot: successful compile output (add after running `npm run compact`)
-- [ ] Screenshot: deployed contract with address shown
-- [x] README section explaining public state vs private witness (above)
-- [x] Initial product idea paragraph (above)
-- [ ] Minimum 5 meaningful commits (track in git log)
-
----
-
 ## License
 
 MIT
