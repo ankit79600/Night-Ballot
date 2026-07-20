@@ -1,0 +1,25 @@
+{
+  "name": "night-ballot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Privacy-preserving on-chain ballot using Midnight zero-knowledge proofs",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "compact": "compact compile src/contract/ballot.compact src/managed/ballot",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "deploy": "tsx src/deploy.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0"
+  }
+}
