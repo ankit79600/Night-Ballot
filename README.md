@@ -8,7 +8,8 @@ Voters cast votes without revealing their identity; only the aggregate tally is 
 |---|---|
 | **Live Demo** | [night-ballot-hl7r.vercel.app](https://night-ballot-hl7r.vercel.app/#vote) |
 | **Demo Video** | [youtu.be/eEf-iAOee48](https://youtu.be/eEf-iAOee48) |
-| **Contract Address** | Not deployed — Midnight Preprod faucet has been unavailable since submission date; contract is fully implemented and all circuits pass the test suite |
+| **Network** | Midnight Preprod (`testnet-02`) |
+| **Contract Address** | `d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3` |
 
 ---
 

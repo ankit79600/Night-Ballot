@@ -1,7 +1,12 @@
-import { useWallet } from '../hooks/useWallet';
+import type { WalletState } from '../hooks/useWallet';
 
-export function WalletBar() {
-  const { state, connect, disconnect } = useWallet();
+type Props = {
+  walletState: WalletState;
+  onConnect: () => void;
+  onDisconnect: () => void;
+};
+
+export function WalletBar({ walletState: state, onConnect: connect, onDisconnect: disconnect }: Props) {
   const short = (addr: string) => `${addr.slice(0, 10)}…${addr.slice(-4)}`;
 
   return (

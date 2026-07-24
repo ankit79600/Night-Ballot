@@ -6,13 +6,20 @@ import { OpenBallotForm } from './components/OpenBallotForm';
 import { VotePanel } from './components/VotePanel';
 import { ClosedResult } from './components/ClosedResult';
 import { useBallot } from './hooks/useBallot';
+import { useWallet } from './hooks/useWallet';
 
 export default function App() {
-  const { ballotState, txStatus, error, openBallot, castVote, closeBallot } = useBallot();
+  const { state: walletState, connect, disconnect } = useWallet();
+
+  const connectedApi =
+    walletState.status === 'connected' ? walletState.info.connectedApi : null;
+
+  const { ballotState, txStatus, error, mode, openBallot, castVote, closeBallot } =
+    useBallot(connectedApi);
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <WalletBar />
+      <WalletBar walletState={walletState} onConnect={connect} onDisconnect={disconnect} />
       <Hero />
       <HowItWorks />
       <PrivacySection />
@@ -21,7 +28,15 @@ export default function App() {
       <section id="vote" className="py-32 px-6 border-t border-white/[0.06]">
         <div className="max-w-6xl mx-auto">
           <div className="mb-12">
-            <p className="text-[12px] font-semibold text-white/30 uppercase tracking-widest mb-3">Live ballot</p>
+            <p className="text-[12px] font-semibold text-white/30 uppercase tracking-widest mb-3">
+              Live ballot
+              {mode === 'onchain' && (
+                <span className="ml-2 text-emerald-400">● on-chain</span>
+              )}
+              {mode === 'simulation' && (
+                <span className="ml-2 text-yellow-500/60">◌ simulation</span>
+              )}
+            </p>
             <h2 className="text-[40px] md:text-[52px] font-black tracking-tight text-white leading-tight">
               Cast your vote.
             </h2>
