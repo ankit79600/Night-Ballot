@@ -1,6 +1,8 @@
 
 # Night Ballot
 
+[![CI](https://github.com/ankit79600/Night-Ballot/actions/workflows/ci.yml/badge.svg)](https://github.com/ankit79600/Night-Ballot/actions/workflows/ci.yml)
+
 A privacy-preserving on-chain ballot built on [Midnight](https://midnight.network/) using zero-knowledge proofs.  
 Voters cast votes without revealing their identity; only the aggregate tally is visible on-chain.
 
@@ -8,8 +10,8 @@ Voters cast votes without revealing their identity; only the aggregate tally is 
 |---|---|
 | **Live Demo** | [night-ballot-hl7r.vercel.app](https://night-ballot-hl7r.vercel.app/#vote) |
 | **Demo Video** | [youtu.be/eEf-iAOee48](https://youtu.be/eEf-iAOee48) |
-| **Network** | Midnight Preprod (`testnet-02`) |
-| **Contract Address** | `d3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3` |
+| **Network** | Midnight Preview |
+| **Contract Address** | Pending (deploying to Preview) |
 
 ---
 
@@ -144,7 +146,7 @@ node --version   # should print v22.x.x
 ### 3. Clone the repo and install dependencies
 
 ```bash
-git clone https://github.com/<your-username>/night-ballot.git
+git clone https://github.com/ankit79600/Night-Ballot.git
 cd night-ballot
 npm install
 ```
@@ -174,7 +176,7 @@ npm test
 
 ---
 
-## Deploying to Preprod
+## Deploying to Preview
 
 ### Start the proof server
 
