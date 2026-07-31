@@ -39,9 +39,10 @@ const zswapKeys = ZswapSecretKeys.fromSeed(seeds.shielded);
 console.log(`Network             : Midnight ${NETWORK}`);
 console.log(`Unshielded address  : ${unshieldedKeystore.getBech32Address().asString()}`);
 const dustPkBytes: Uint8Array =
-  typeof dustSecretKey.publicKey === 'function'
-    ? dustSecretKey.publicKey().bytes()
-    : (dustSecretKey as any).pk?.bytes?.() ?? (dustSecretKey as any).toPublicKey?.()?.bytes?.() ?? new Uint8Array();
+  (dustSecretKey as any).publicKey?.()?.bytes?.()
+  ?? (dustSecretKey as any).pk?.bytes?.()
+  ?? (dustSecretKey as any).toPublicKey?.()?.bytes?.()
+  ?? new Uint8Array();
 console.log(`Dust public key     : ${Buffer.from(dustPkBytes).toString('hex') || '(not directly accessible — use unshielded address for faucet)'}`);
 console.log('\nFund the wallet via the Midnight preprod faucet, then run:');
 console.log('  $env:NODE_OPTIONS=\'--max-old-space-size=4096\'; npm run deploy');
