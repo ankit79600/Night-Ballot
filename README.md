@@ -77,6 +77,35 @@ isOpen    = disclose(1 as Field);
 
 ---
 
+## Privacy Model
+
+Night Ballot is built on Midnight's **privacy-by-default** model. Here is exactly what a blockchain observer (anyone querying the chain) can and cannot learn:
+
+### What an observer CAN learn
+
+| Observable | Value |
+|---|---|
+| The ballot question | e.g. "Should we allocate funds to project X?" |
+| Running YES vote count | e.g. `yesVotes = 7` |
+| Running NO vote count | e.g. `noVotes = 3` |
+| Whether voting is open or closed | `isOpen = 1` or `0` |
+| A commitment (SHA-256 hash) of the organizer's key | e.g. `0x3f2a…` — proves the same organizer acts throughout |
+
+### What an observer CANNOT learn
+
+| Hidden | Why it stays hidden |
+|---|---|
+| **Who cast each vote** | Votes are submitted via ZK proof — no wallet address or identity is linked to any individual vote |
+| **The organizer's actual secret key** | Only its SHA-256 hash is stored on-chain; the raw key is a private witness that never leaves the prover's machine |
+| **How any specific voter voted** | The circuit proves a vote is valid (yes or no) without revealing which choice was made by whom |
+| **Whether a given address has voted** | No per-voter state is written to the ledger |
+
+### Why this matters
+
+A traditional on-chain vote (e.g. Ethereum) records every voter's address and choice in plain sight. Night Ballot replaces that with a ZK proof: the circuit attests that a valid vote was cast, the chain verifies the proof, and the tally increments — but no identifying information ever touches the public ledger.
+
+---
+
 ## Project Structure
 
 ```
