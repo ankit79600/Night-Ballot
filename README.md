@@ -174,6 +174,10 @@ No proof server or blockchain connection needed — tests use the local simulato
 npm test
 ```
 
+Expected output (16 tests passing):
+
+![Test output showing 16 tests passing](screenshots/test-output.png)
+
 ---
 
 ## Deploying to Preview
