@@ -15,7 +15,7 @@ export function WalletBar({ walletState: state, onConnect: connect, onDisconnect
         <a href="#" className="flex items-center gap-2.5">
           <span className="text-lg">🗳️</span>
           <span className="font-semibold text-sm tracking-tight">Night Ballot</span>
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/[0.06] text-white/40 uppercase tracking-wider">preprod</span>
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/[0.06] text-white/40 uppercase tracking-wider">preview</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-7 text-[13px] text-white/40">

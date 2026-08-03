@@ -36,7 +36,7 @@ export function ClosedResult({ ballotState }: Props) {
       </div>
 
       <p className="text-[12px] text-white/20">
-        {total} votes cast · no voter was ever identified · verified on Midnight Preprod
+        {total} votes cast · no voter was ever identified · verified on Midnight Preview
       </p>
     </div>
   );

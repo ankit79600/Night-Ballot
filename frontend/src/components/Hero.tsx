@@ -9,7 +9,7 @@ export function Hero() {
           {/* Tag */}
           <div className="fade-up inline-flex items-center gap-2 mb-8 text-[12px] font-medium text-white/40 border border-white/[0.08] rounded-full px-3 py-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot" />
-            Live on Midnight Preprod Testnet
+            Live on Midnight Preview Testnet
           </div>
 
           {/* Headline — big, tight, structured */}

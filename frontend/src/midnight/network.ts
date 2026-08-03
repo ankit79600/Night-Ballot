@@ -11,10 +11,10 @@ export const NETWORKS: Record<NetworkId, { query: string; ws: string }> = {
   },
 };
 
-export const ACTIVE_NETWORK: NetworkId = 'preprod';
+export const ACTIVE_NETWORK: NetworkId = 'preview';
 export const INDEXER_URLS = NETWORKS[ACTIVE_NETWORK];
 
-// Deployed contract address on Midnight Preprod.
+// Deployed contract address on Midnight Preview.
 // Set via VITE_CONTRACT_ADDRESS at build time or falls back to empty (simulation mode).
 export const CONTRACT_ADDRESS: string =
   (import.meta as any).env?.VITE_CONTRACT_ADDRESS ?? '';
