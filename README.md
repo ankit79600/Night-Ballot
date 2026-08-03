@@ -11,7 +11,7 @@ Voters cast votes without revealing their identity; only the aggregate tally is 
 | **Live Demo** | [night-ballot-hl7r.vercel.app](https://night-ballot-hl7r.vercel.app/#vote) |
 | **Demo Video** | [youtu.be/eEf-iAOee48](https://youtu.be/eEf-iAOee48) |
 | **Network** | Midnight Preview |
-| **Contract Address** | Not deployed — Midnight Faucet services are currently down; test tokens unavailable so on-chain deployment is not possible at this time |
+| **Contract Address** | `9f6621c985e268c0bbffa59799a6000e6130a14d9334e1731f8f059f4a90e807` |
 
 ---
 

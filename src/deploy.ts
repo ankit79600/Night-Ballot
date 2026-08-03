@@ -31,6 +31,7 @@ import {
   DustSecretKey,
   ZswapSecretKeys,
   LedgerParameters,
+  unshieldedToken,
 } from '@midnight-ntwrk/ledger-v8';
 import {
   PreprodTestEnvironment,
@@ -197,7 +198,40 @@ async function deploy(): Promise<void> {
     console.warn(`WARNING: ${(err as any).message ?? err}. Attempting deployment anyway…`);
   }
 
-  // 9. Build midnight-js providers
+  // 9. Register NIGHT UTXOs for dust generation if dust balance is still 0
+  //    On Midnight, tNight tokens in the unshielded wallet must be explicitly
+  //    registered on-chain before the dust wallet can use them to pay fees.
+  try {
+    const currentState = await firstValueFrom((facade as any).state()) as any;
+    const dustBal = currentState?.dust?.balance?.(new Date()) ?? 0n;
+    if (dustBal === 0n) {
+      console.log('\nDust balance is 0 — registering NIGHT UTXOs for dust generation…');
+      const unshieldedRaw = unshieldedToken().raw;
+      const unregistered = (currentState?.unshielded?.availableCoins ?? [])
+        .filter((coin: any) => coin.utxo.type === unshieldedRaw && coin.meta.registeredForDustGeneration === false);
+      if (unregistered.length === 0) {
+        console.warn('WARNING: No unregistered NIGHT UTXOs found. Make sure the faucet sent tokens to the unshielded address.');
+      } else {
+        console.log(`  Found ${unregistered.length} unregistered NIGHT UTXO(s). Submitting registration tx…`);
+        const recipe = await (facade as any).registerNightUtxosForDustGeneration(
+          unregistered,
+          unshieldedKeystore.getPublicKey(),
+          (payload: Uint8Array) => unshieldedKeystore.signData(payload),
+        );
+        const finalized = await (facade as any).finalizeRecipe(recipe);
+        const txId = await (facade as any).submitTransaction(finalized);
+        console.log(`  Registration tx submitted: ${txId}`);
+        console.log('  Waiting 30s for on-chain confirmation…');
+        await new Promise(resolve => setTimeout(resolve, 30_000));
+      }
+    } else {
+      console.log(`\nDust balance confirmed: ${dustBal}`);
+    }
+  } catch (err: any) {
+    console.warn(`WARNING: Dust registration check failed: ${err?.message ?? err}. Attempting deployment anyway…`);
+  }
+
+  // 11. Build midnight-js providers
   const providers = initializeMidnightProviders<string, null>(
     walletProvider,
     envConfig,
@@ -205,7 +239,7 @@ async function deploy(): Promise<void> {
   );
   (providers as any).privateStateProvider = inMemoryPrivateStateProvider();
 
-  // 10. Compile contract with witnesses
+  // 12. Compile contract with witnesses
   const witnesses = createWitnesses();
   const compiledContract = CompiledContract.make('ballot', Contract).pipe(
     CompiledContract.withWitnesses({
@@ -214,7 +248,7 @@ async function deploy(): Promise<void> {
     CompiledContract.withCompiledFileAssets(MANAGED_DIR),
   );
 
-  // 11. Deploy!
+  // 13. Deploy!
   console.log('\nCalling deployContract()…');
   const deployed = await deployContract(providers as any, {
     compiledContract: compiledContract as any,
