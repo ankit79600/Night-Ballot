@@ -1,7 +1,7 @@
 
 # Night Ballot
 
-[![CI](https://github.com/ankit79600/Night-Ballot/actions/workflows/ci.yml/badge.svg)](https://github.com/ankit79600/Night-Ballot/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/ankit79600/Night-Ballot/actions/workflows/ci.yml/badge.svg)](https://github.com/ankit79600/Night-Ballot/actions/workflows/ci.yml)
 
 A privacy-preserving on-chain ballot built on [Midnight](https://midnight.network/) using zero-knowledge proofs.  
 Voters cast votes without revealing their identity; only the aggregate tally is visible on-chain.
