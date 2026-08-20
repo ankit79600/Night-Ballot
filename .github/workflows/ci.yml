@@ -53,9 +53,6 @@ jobs:
     needs: [contract, frontend]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://night-ballot-hl7r.vercel.app
     steps:
       - uses: actions/checkout@v4
 
