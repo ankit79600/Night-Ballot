@@ -5,6 +5,7 @@ import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 export type { BallotState };
 
 const DEFAULT_ORGANIZER_KEY = new Uint8Array(32).fill(0x42);
+const POLL_INTERVAL_MS = 10_000;
 
 export type TxStatus = 'idle' | 'pending' | 'success' | 'error';
 
@@ -17,7 +18,7 @@ export function useBallot(connectedApi: ConnectedAPI | null) {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<BallotMode>('simulation');
 
-  // When wallet connects/disconnects, switch between on-chain and simulation
+  // Switch mode when wallet connects / disconnects
   useEffect(() => {
     const api = apiRef.current;
     if (connectedApi) {
@@ -31,6 +32,20 @@ export function useBallot(connectedApi: ConnectedAPI | null) {
       setBallotState(api.getSimulatedState());
     }
   }, [connectedApi]);
+
+  // Poll on-chain state every 10 s when connected
+  useEffect(() => {
+    if (mode !== 'onchain') return;
+    const id = setInterval(async () => {
+      try {
+        const state = await apiRef.current.getState();
+        setBallotState(state);
+      } catch {
+        // silent — network blip should not crash the UI
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [mode]);
 
   const refresh = useCallback(async () => {
     const state = await apiRef.current.getState();
