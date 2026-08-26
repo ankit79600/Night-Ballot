@@ -11,7 +11,9 @@
     "compact": "compact compile src/contract/ballot.compact src/managed/ballot",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "deploy": "tsx src/deploy.ts"
+    "deploy": "tsx src/deploy.ts",
+    "generate-voters": "tsx src/generate-voters.ts",
+    "simulate-voters": "tsx src/simulate-voters.ts"
   },
   "devDependencies": {
     "@midnight-ntwrk/testkit-js": "^4.1.1",
