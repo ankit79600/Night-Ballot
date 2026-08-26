@@ -5,8 +5,14 @@ import { PrivacySection } from './components/PrivacyBadge';
 import { OpenBallotForm } from './components/OpenBallotForm';
 import { VotePanel } from './components/VotePanel';
 import { ClosedResult } from './components/ClosedResult';
+import { NetworkBadge } from './components/NetworkBadge';
+import { UserRegistry } from './components/UserRegistry';
+import { ShareBallot } from './components/ShareBallot';
+import { BallotRounds, useBallotHistory } from './components/BallotRounds';
 import { useBallot } from './hooks/useBallot';
 import { useWallet } from './hooks/useWallet';
+
+const CONTRACT_ADDRESS = import.meta.env['VITE_CONTRACT_ADDRESS'] as string | undefined;
 
 export default function App() {
   const { state: walletState, connect, disconnect } = useWallet();
@@ -16,6 +22,24 @@ export default function App() {
 
   const { ballotState, txStatus, error, mode, openBallot, castVote, closeBallot } =
     useBallot(connectedApi);
+
+  const { history, addRecord } = useBallotHistory();
+
+  // Record ballot into history when it closes
+  const handleClose = async () => {
+    await closeBallot();
+    if (ballotState.proposal) {
+      addRecord({
+        proposal: ballotState.proposal,
+        yesVotes: Number(ballotState.yesVotes),
+        noVotes: Number(ballotState.noVotes),
+        closedAt: new Date().toLocaleDateString(),
+      });
+    }
+  };
+
+  const isOpen = ballotState.isOpen;
+  const isClosed = !ballotState.isOpen && ballotState.proposal !== null;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -45,17 +69,38 @@ export default function App() {
             </p>
           </div>
 
-          <div className="max-w-xl">
-            {!ballotState.isOpen && ballotState.proposal === null && (
-              <OpenBallotForm onOpen={openBallot} txStatus={txStatus} error={error} />
-            )}
-            {ballotState.isOpen && (
-              <VotePanel ballotState={ballotState} onVote={castVote} onClose={closeBallot}
-                txStatus={txStatus} error={error} />
-            )}
-            {!ballotState.isOpen && ballotState.proposal !== null && (
-              <ClosedResult ballotState={ballotState} />
-            )}
+          <div className="grid lg:grid-cols-[1fr_300px] gap-8 items-start">
+            {/* Main ballot panel */}
+            <div className="max-w-xl">
+              {!isOpen && !isClosed && (
+                <OpenBallotForm onOpen={openBallot} txStatus={txStatus} error={error} />
+              )}
+              {isOpen && (
+                <VotePanel
+                  ballotState={ballotState}
+                  onVote={castVote}
+                  onClose={handleClose}
+                  txStatus={txStatus}
+                  error={error}
+                />
+              )}
+              {isClosed && (
+                <ClosedResult ballotState={ballotState} contractAddress={CONTRACT_ADDRESS} />
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-4">
+              <NetworkBadge contractAddress={CONTRACT_ADDRESS} mode={mode} />
+              <UserRegistry count={50} />
+              {isClosed && (
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                  <p className="text-[11px] font-semibold text-white/30 uppercase tracking-widest mb-3">Share</p>
+                  <ShareBallot proposal={ballotState.proposal} />
+                </div>
+              )}
+              <BallotRounds history={history} />
+            </div>
           </div>
         </div>
       </section>
