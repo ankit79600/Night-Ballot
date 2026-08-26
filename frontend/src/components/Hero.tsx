@@ -42,7 +42,7 @@ export function Hero() {
           {[
             { n: '100%', label: 'Voter anonymity' },
             { n: 'ZK',   label: 'Proofs on Midnight' },
-            { n: '0',    label: 'Identity leaks' },
+            { n: '50',   label: 'Beta testers' },
             { n: '4',    label: 'Circuits compiled' },
           ].map(({ n, label }) => (
             <div key={label}>
