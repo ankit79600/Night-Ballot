@@ -10,7 +10,7 @@
 ## Feedback Collection Method
 
 Feedback was gathered through:
-1. Direct DM responses to the Night Ballot X post ([@ankit_pate33282](https://x.com/ankit_pate33282))
+1. Direct DM responses to the Night Ballot X post ([@NightBallot](https://x.com/NightBallot))
 2. GitHub Issues on the public repository
 3. In-app error reports surfaced during ZK proof generation
 4. Post-vote survey form shared with beta testers
