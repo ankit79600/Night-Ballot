@@ -14,7 +14,7 @@ Voters cast votes without revealing their identity; only the aggregate tally is 
 | **Contract Address** | `9f6621c985e268c0bbffa59799a6000e6130a14d9334e1731f8f059f4a90e807` |
 | **X (Twitter)** | [@NightBallot](https://x.com/NightBallot) |
 | **GitHub** | [ankit79600/Night-Ballot](https://github.com/ankit79600/Night-Ballot) |
-| **Google Form** | [Night Ballot User Feedback Form](https://forms.gle/REPLACE_WITH_FORM_ID) |
+| **Google Form** | [Night Ballot User Feedback Form](https://forms.gle/CqbtJtTyyZespanu9) |
 | **Feedback Sheet** | [Responses — Google Sheet](https://docs.google.com/spreadsheets/d/REPLACE_WITH_SHEET_ID/edit?usp=sharing) |
 | **Beta Users (50)** | [docs/preprod-users.md](docs/preprod-users.md) |
 | **Feedback Doc** | [docs/FEEDBACK.md](docs/FEEDBACK.md) |
@@ -279,19 +279,17 @@ npm run deploy
 
 | Resource | Link |
 |---|---|
-| **Google Form** | [Night Ballot User Feedback Form](https://forms.gle/REPLACE_WITH_FORM_ID) |
+| **Google Form** | [Night Ballot User Feedback Form](https://forms.gle/CqbtJtTyyZespanu9) |
 | **Feedback Sheet** | [Responses — Google Sheet](https://docs.google.com/spreadsheets/d/REPLACE_WITH_SHEET_ID/edit?usp=sharing) |
 
 **Form fields (required by Level 5):**
 - Name
 - Email
-- Midnight Preview Wallet Address
-- Product Rating (1–5 stars)
-- Which feature did you like the most?
-- What feature do you think is missing?
-- Did you encounter any bugs or usability issues?
-- Would you recommend Night Ballot to others?
+- Wallet Address
+- Product Rating
+- Would you recommend this product to others?
 - What improvements would you like to see?
+- Did you encounter any bugs or usability issues?
 
 ### Improvement Summary
 
