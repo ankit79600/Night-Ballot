@@ -15,7 +15,7 @@ Voters cast votes without revealing their identity; only the aggregate tally is 
 | **X (Twitter)** | [@NightBallot](https://x.com/NightBallot) |
 | **GitHub** | [ankit79600/Night-Ballot](https://github.com/ankit79600/Night-Ballot) |
 | **Google Form** | [Night Ballot User Feedback Form](https://forms.gle/CqbtJtTyyZespanu9) |
-| **Feedback Sheet** | [Responses — Google Sheet](https://docs.google.com/spreadsheets/d/REPLACE_WITH_SHEET_ID/edit?usp=sharing) |
+| **Feedback Sheet** | [Responses — Google Sheet](https://docs.google.com/spreadsheets/d/1-rSSr4wr0JYSRm-dzmRZCSCNx0Wn6pl8te3k3qHLT7s/edit?usp=sharing) |
 | **Beta Users (50)** | [docs/preprod-users.md](docs/preprod-users.md) |
 | **Feedback Doc** | [docs/FEEDBACK.md](docs/FEEDBACK.md) |
 | **Changelog** | [CHANGELOG.md](CHANGELOG.md) |
@@ -280,7 +280,7 @@ npm run deploy
 | Resource | Link |
 |---|---|
 | **Google Form** | [Night Ballot User Feedback Form](https://forms.gle/CqbtJtTyyZespanu9) |
-| **Feedback Sheet** | [Responses — Google Sheet](https://docs.google.com/spreadsheets/d/REPLACE_WITH_SHEET_ID/edit?usp=sharing) |
+| **Feedback Sheet** | [Responses — Google Sheet](https://docs.google.com/spreadsheets/d/1-rSSr4wr0JYSRm-dzmRZCSCNx0Wn6pl8te3k3qHLT7s/edit?usp=sharing) |
 
 **Form fields (required by Level 5):**
 - Name
