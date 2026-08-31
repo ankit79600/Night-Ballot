@@ -112,6 +112,7 @@ export function buildPrivateStateProvider(): PrivateStateProvider<PrivateStateId
     get: async (id: PrivateStateId) => store.get(id) ?? null,
     set: async (id: PrivateStateId, state: null) => { store.set(id, state); },
     remove: async (id: PrivateStateId) => { store.delete(id); },
+    setContractAddress: async (_contractAddress: string) => {},
   } as unknown as PrivateStateProvider<PrivateStateId, null>;
 }
 
