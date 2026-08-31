@@ -275,8 +275,6 @@ npm run deploy
 
 ### User Feedback Form
 
-> **Action needed:** Create the Google Form, export responses to a public Google Sheet, then replace the placeholder links below.
-
 | Resource | Link |
 |---|---|
 | **Google Form** | [Night Ballot User Feedback Form](https://forms.gle/CqbtJtTyyZespanu9) |
