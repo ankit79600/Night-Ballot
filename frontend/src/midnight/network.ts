@@ -6,8 +6,8 @@ export const NETWORKS: Record<NetworkId, { query: string; ws: string }> = {
     ws: 'wss://indexer.preprod.midnight.network/api/v3/graphql/ws',
   },
   preview: {
-    query: 'https://indexer.preview.midnight.network/api/v3/graphql',
-    ws: 'wss://indexer.preview.midnight.network/api/v3/graphql/ws',
+    query: 'https://indexer.preview.midnight.network/api/v4/graphql',
+    ws: 'wss://indexer.preview.midnight.network/api/v4/graphql/ws',
   },
 };
 
