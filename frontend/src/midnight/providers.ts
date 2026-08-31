@@ -6,6 +6,9 @@
  */
 
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
+import {
+  createProofProvider,
+} from '@midnight-ntwrk/midnight-js-types';
 import type {
   MidnightProviders,
   PrivateStateId,
@@ -125,7 +128,8 @@ export async function buildMidnightProviders(
 ): Promise<MidnightProviders<CircuitId, PrivateStateId, null>> {
   const keyMaterialProvider = buildKeyMaterialProvider();
   const zkConfigProvider = buildZkConfigProvider(keyMaterialProvider);
-  const proofProvider = await connectedApi.getProvingProvider(keyMaterialProvider) as unknown as ProofProvider;
+  const provingProvider = await connectedApi.getProvingProvider(keyMaterialProvider);
+  const proofProvider = createProofProvider(provingProvider as any);
   const walletProvider = await buildWalletProvider(connectedApi);
   const midnightProvider = buildMidnightProvider(connectedApi);
   const publicDataProvider = indexerPublicDataProvider(INDEXER_URLS.query, INDEXER_URLS.ws);
