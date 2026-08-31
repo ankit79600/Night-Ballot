@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { WalletState } from '../hooks/useWallet';
 
 type Props = {
@@ -7,7 +8,14 @@ type Props = {
 };
 
 export function WalletBar({ walletState: state, onConnect: connect, onDisconnect: disconnect }: Props) {
+  const [copied, setCopied] = useState(false);
   const short = (addr: string) => `${addr.slice(0, 10)}…${addr.slice(-4)}`;
+
+  const copyAddress = (addr: string) => {
+    navigator.clipboard.writeText(addr);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 border-b border-white/[0.06] bg-black/80 backdrop-blur-xl">
@@ -28,7 +36,16 @@ export function WalletBar({ walletState: state, onConnect: connect, onDisconnect
           {state.status === 'connected' && (
             <div className="flex items-center gap-2 text-[12px] text-white/40">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot" />
-              <span className="font-mono hidden sm:block">{short(state.info.address)}</span>
+              <button
+                onClick={() => copyAddress(state.info.address)}
+                title={state.info.address}
+                className="group relative font-mono hidden sm:block hover:text-white transition-colors cursor-pointer"
+              >
+                <span className="group-hover:hidden">{short(state.info.address)}</span>
+                <span className="hidden group-hover:inline text-emerald-400 text-[11px]">
+                  {copied ? 'Copied!' : state.info.address}
+                </span>
+              </button>
             </div>
           )}
           {state.status === 'error' && (
