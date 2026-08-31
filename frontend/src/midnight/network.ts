@@ -2,12 +2,12 @@ export type NetworkId = 'preprod' | 'preview';
 
 export const NETWORKS: Record<NetworkId, { query: string; ws: string }> = {
   preprod: {
-    query: 'https://indexer.testnet-02.midnight.network/api/v1/graphql',
-    ws: 'wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws',
+    query: 'https://indexer.preprod.midnight.network/api/v3/graphql',
+    ws: 'wss://indexer.preprod.midnight.network/api/v3/graphql/ws',
   },
   preview: {
-    query: 'https://indexer.testnet.midnight.network/api/v1/graphql',
-    ws: 'wss://indexer.testnet.midnight.network/api/v1/graphql/ws',
+    query: 'https://indexer.preview.midnight.network/api/v3/graphql',
+    ws: 'wss://indexer.preview.midnight.network/api/v3/graphql/ws',
   },
 };
 
