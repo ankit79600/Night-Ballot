@@ -3,7 +3,7 @@
  *
  * ON-CHAIN MODE (default when wallet connected + CONTRACT_ADDRESS set):
  *   Uses @midnight-ntwrk/midnight-js-contracts to submit real ZK circuit
- *   transactions via the deployed Preprod contract.
+ *   transactions via the deployed Preview contract.
  *
  * SIMULATION MODE (fallback when no contract address or no wallet):
  *   Runs circuits locally using compact-runtime with in-memory state.
@@ -11,7 +11,8 @@
  */
 
 import * as runtime from '@midnight-ntwrk/compact-runtime';
-import { findDeployedContract, submitCallTx } from '@midnight-ntwrk/midnight-js-contracts';
+import { CompiledContract } from '@midnight-ntwrk/compact-js';
+import { findDeployedContract, getPublicStates } from '@midnight-ntwrk/midnight-js-contracts';
 import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import {
   Contract,
@@ -34,12 +35,12 @@ export type BallotState = {
 export type OrganizerKey = Uint8Array;
 
 // ---------------------------------------------------------------------------
-// On-chain API (Midnight Preprod via Lace wallet)
+// On-chain API (Midnight Preview via Lace wallet)
 // ---------------------------------------------------------------------------
 
 export class OnChainBallotAPI {
   private constructor(
-    private readonly foundContract: Awaited<ReturnType<typeof findDeployedContract>>,
+    private readonly foundContract: any,
     private readonly providers: Awaited<ReturnType<typeof buildMidnightProviders>>,
   ) {}
 
@@ -52,31 +53,34 @@ export class OnChainBallotAPI {
 
     const providers = await buildMidnightProviders(connectedApi);
 
-    const witnesses = {
-      organizerKey: (_ctx: unknown): [null, Uint8Array] => {
-        // The organizer key is provided via the connected wallet's private state.
-        // For voting circuits (castYes/castNo), this witness is not called.
-        throw new Error(
-          'organizerKey witness called on voting-only circuit — organizer key not available in browser.',
-        );
-      },
-    };
-
-    const contract = new Contract(witnesses as any);
+    // Build a compiledContract binding (ZK assets are served from /keys/ via zkConfigProvider)
+    const compiledContract = (CompiledContract.make('ballot', Contract) as any).pipe(
+      (CompiledContract.withWitnesses as any)({
+        organizerKey: (_ctx: unknown): [null, Uint8Array] => {
+          // Organizer key not available in the browser voting path.
+          throw new Error(
+            'organizerKey witness called on voting-only circuit — not available in browser.',
+          );
+        },
+      }),
+    );
 
     const foundContract = await findDeployedContract(providers as any, {
-      contractAddress: CONTRACT_ADDRESS,
-      contract,
-      privateStateKey: 'ballot-private',
+      contractAddress: CONTRACT_ADDRESS as any,
+      compiledContract: compiledContract as any,
+      privateStateId: 'ballot-private',
       initialPrivateState: null,
     } as any);
 
-    return new OnChainBallotAPI(foundContract as any, providers);
+    return new OnChainBallotAPI(foundContract, providers);
   }
 
   async getState(): Promise<BallotState> {
-    const states = await (this.foundContract as any).getStates();
-    const l: Ledger = ledger(states.public.data);
+    const states = await getPublicStates(
+      this.providers.publicDataProvider,
+      CONTRACT_ADDRESS as any,
+    );
+    const l: Ledger = ledger(states.contractState.data);
     return {
       isOpen: l.isOpen === 1n,
       proposal: l.proposal.is_some ? l.proposal.value : null,
@@ -87,26 +91,19 @@ export class OnChainBallotAPI {
   }
 
   async openBallot(proposal: string): Promise<void> {
-    const callTx = (this.foundContract as any).callTx;
-    const callTxData = await callTx.openBallot(proposal);
-    await submitCallTx(this.providers as any, callTxData);
+    await this.foundContract.callTx.openBallot(proposal);
   }
 
   async castVote(vote: 'yes' | 'no'): Promise<void> {
-    const callTx = (this.foundContract as any).callTx;
     if (vote === 'yes') {
-      const callTxData = await callTx.castYes();
-      await submitCallTx(this.providers as any, callTxData);
+      await this.foundContract.callTx.castYes();
     } else {
-      const callTxData = await callTx.castNo();
-      await submitCallTx(this.providers as any, callTxData);
+      await this.foundContract.callTx.castNo();
     }
   }
 
   async closeBallot(): Promise<void> {
-    const callTx = (this.foundContract as any).callTx;
-    const callTxData = await callTx.closeBallot();
-    await submitCallTx(this.providers as any, callTxData);
+    await this.foundContract.callTx.closeBallot();
   }
 }
 
