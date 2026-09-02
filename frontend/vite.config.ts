@@ -6,6 +6,7 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [wasm(), topLevelAwait(), react()],
+  envDir: path.resolve(__dirname, '..'),
   resolve: {
     alias: {
       '@contract': path.resolve(__dirname, '../src/managed/ballot/contract'),
