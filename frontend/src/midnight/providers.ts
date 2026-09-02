@@ -8,6 +8,10 @@
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import {
   createProofProvider,
+  ZKConfigProvider,
+  createZKIR,
+  createProverKey,
+  createVerifierKey,
 } from '@midnight-ntwrk/midnight-js-types';
 import type {
   MidnightProviders,
@@ -15,8 +19,10 @@ import type {
   WalletProvider,
   MidnightProvider,
   PrivateStateProvider,
-  ZKConfigProvider,
   ProofProvider,
+  ZKIR,
+  ProverKey,
+  VerifierKey,
 } from '@midnight-ntwrk/midnight-js-types';
 import type { ConnectedAPI, KeyMaterialProvider } from '@midnight-ntwrk/dapp-connector-api';
 import { INDEXER_URLS } from './network.js';
@@ -53,17 +59,23 @@ export function buildKeyMaterialProvider(): KeyMaterialProvider {
 
 // ---------------------------------------------------------------------------
 // ZK config provider (wraps KeyMaterialProvider for midnight-js-types)
+// Must extend the abstract ZKConfigProvider class so the concrete
+// getVerifierKeys() method is available on the prototype.
 // ---------------------------------------------------------------------------
 
 export function buildZkConfigProvider(kmp: KeyMaterialProvider): ZKConfigProvider<CircuitId> {
-  return {
-    getZKConfig: async (circuitId: CircuitId) => ({
-      circuitId,
-      proverKey: await kmp.getProverKey(circuitId) as any,
-      verifierKey: await kmp.getVerifierKey(circuitId) as any,
-      zkir: await kmp.getZKIR(circuitId) as any,
-    }),
-  } as unknown as ZKConfigProvider<CircuitId>;
+  class BrowserZKConfigProvider extends ZKConfigProvider<CircuitId> {
+    async getZKIR(circuitId: CircuitId): Promise<ZKIR> {
+      return createZKIR(await kmp.getZKIR(circuitId));
+    }
+    async getProverKey(circuitId: CircuitId): Promise<ProverKey> {
+      return createProverKey(await kmp.getProverKey(circuitId));
+    }
+    async getVerifierKey(circuitId: CircuitId): Promise<VerifierKey> {
+      return createVerifierKey(await kmp.getVerifierKey(circuitId));
+    }
+  }
+  return new BrowserZKConfigProvider();
 }
 
 // ---------------------------------------------------------------------------
