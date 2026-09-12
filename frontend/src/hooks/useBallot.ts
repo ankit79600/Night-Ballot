@@ -16,19 +16,26 @@ export function useBallot(connectedApi: ConnectedAPI | null) {
   );
   const [txStatus, setTxStatus] = useState<TxStatus>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [connectError, setConnectError] = useState<string | null>(null);
   const [mode, setMode] = useState<BallotMode>('simulation');
 
   // Switch mode when wallet connects / disconnects
   useEffect(() => {
     const api = apiRef.current;
     if (connectedApi) {
+      setConnectError(null);
       api.connectWallet(connectedApi).then(() => {
         setMode(api.getMode());
         api.getState().then(setBallotState).catch(console.error);
+      }).catch((err: unknown) => {
+        setMode('simulation');
+        const msg = (err as any)?.reason ?? (err as Error)?.message ?? 'Failed to connect to wallet.';
+        setConnectError(msg);
       });
     } else {
       api.disconnectWallet();
       setMode('simulation');
+      setConnectError(null);
       setBallotState(api.getSimulatedState());
     }
   }, [connectedApi]);
@@ -76,5 +83,5 @@ export function useBallot(connectedApi: ConnectedAPI | null) {
   const closeBallot = useCallback(() =>
     run(() => apiRef.current.closeBallot()), [run]);
 
-  return { ballotState, txStatus, error, mode, openBallot, castVote, closeBallot };
+  return { ballotState, txStatus, error, connectError, mode, openBallot, castVote, closeBallot };
 }

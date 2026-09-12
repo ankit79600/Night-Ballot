@@ -20,7 +20,7 @@ export default function App() {
   const connectedApi =
     walletState.status === 'connected' ? walletState.info.connectedApi : null;
 
-  const { ballotState, txStatus, error, mode, openBallot, castVote, closeBallot } =
+  const { ballotState, txStatus, error, connectError, mode, openBallot, castVote, closeBallot } =
     useBallot(connectedApi);
 
   const { history, addRecord } = useBallotHistory();
@@ -68,6 +68,13 @@ export default function App() {
               Your identity is protected by zero-knowledge cryptography — not a privacy policy.
             </p>
           </div>
+
+          {connectError && (
+            <div className="mb-8 flex items-start gap-3 rounded-xl border border-amber-400/20 bg-amber-400/5 px-5 py-4 text-[13px] text-amber-300">
+              <span className="mt-0.5 shrink-0">⚠</span>
+              <span><strong>Wallet not ready:</strong> {connectError} Running in simulation mode — unlock your wallet and reconnect to vote on-chain.</span>
+            </div>
+          )}
 
           <div className="grid lg:grid-cols-[1fr_300px] gap-8 items-start">
             {/* Main ballot panel */}

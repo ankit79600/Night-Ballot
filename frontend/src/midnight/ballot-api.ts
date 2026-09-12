@@ -229,8 +229,8 @@ export class BallotAPI {
       this.onChain = await OnChainBallotAPI.create(connectedApi);
       this.mode = 'onchain';
     } catch (err) {
-      console.warn('[BallotAPI] On-chain mode unavailable, using simulation:', err);
       this.mode = 'simulation';
+      throw err;
     }
   }
 
