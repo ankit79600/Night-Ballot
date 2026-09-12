@@ -21,6 +21,20 @@ import {
 } from '../contract/index.js';
 import { buildMidnightProviders } from './providers.js';
 import { CONTRACT_ADDRESS } from './network.js';
+import { reconnectWallet } from './connector.js';
+
+function isPortError(err: unknown): boolean {
+  const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
+  return (
+    msg.includes('disconnected port') ||
+    msg.includes('port is disconnected') ||
+    msg.includes('extension context invalidated')
+  );
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise(r => setTimeout(r, ms));
+}
 
 export type { Ledger };
 
@@ -51,28 +65,43 @@ export class OnChainBallotAPI {
       );
     }
 
-    const providers = await buildMidnightProviders(connectedApi);
+    let api = connectedApi;
+    let lastErr: unknown;
 
-    // Build a compiledContract binding (ZK assets are served from /keys/ via zkConfigProvider)
-    const compiledContract = (CompiledContract.make('ballot', Contract) as any).pipe(
-      (CompiledContract.withWitnesses as any)({
-        organizerKey: (_ctx: unknown): [null, Uint8Array] => {
-          // Organizer key not available in the browser voting path.
-          throw new Error(
-            'organizerKey witness called on voting-only circuit — not available in browser.',
-          );
-        },
-      }),
-    );
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const providers = await buildMidnightProviders(api);
 
-    const foundContract = await findDeployedContract(providers as any, {
-      contractAddress: CONTRACT_ADDRESS as any,
-      compiledContract: compiledContract as any,
-      privateStateId: 'ballot-private',
-      initialPrivateState: null,
-    } as any);
+        const compiledContract = (CompiledContract.make('ballot', Contract) as any).pipe(
+          (CompiledContract.withWitnesses as any)({
+            organizerKey: (_ctx: unknown): [null, Uint8Array] => {
+              throw new Error(
+                'organizerKey witness called on voting-only circuit — not available in browser.',
+              );
+            },
+          }),
+        );
 
-    return new OnChainBallotAPI(foundContract, providers);
+        const foundContract = await findDeployedContract(providers as any, {
+          contractAddress: CONTRACT_ADDRESS as any,
+          compiledContract: compiledContract as any,
+          privateStateId: 'ballot-private',
+          initialPrivateState: null,
+        } as any);
+
+        return new OnChainBallotAPI(foundContract, providers);
+      } catch (err) {
+        lastErr = err;
+        if (attempt < 2 && isPortError(err)) {
+          await delay(400 * (attempt + 1));
+          const fresh = await reconnectWallet();
+          if (fresh) { api = fresh; continue; }
+        }
+        break;
+      }
+    }
+
+    throw lastErr;
   }
 
   async getState(): Promise<BallotState> {
@@ -187,6 +216,7 @@ export class BallotAPI {
   private onChain: OnChainBallotAPI | null = null;
   private simulated: SimulatedBallotAPI;
   private mode: BallotMode;
+  private lastConnectedApi: ConnectedAPI | null = null;
 
   constructor(organizerKey: OrganizerKey) {
     this.simulated = new SimulatedBallotAPI(organizerKey);
@@ -194,6 +224,7 @@ export class BallotAPI {
   }
 
   async connectWallet(connectedApi: ConnectedAPI): Promise<void> {
+    this.lastConnectedApi = connectedApi;
     try {
       this.onChain = await OnChainBallotAPI.create(connectedApi);
       this.mode = 'onchain';
@@ -205,6 +236,7 @@ export class BallotAPI {
 
   disconnectWallet(): void {
     this.onChain = null;
+    this.lastConnectedApi = null;
     this.mode = 'simulation';
   }
 
@@ -212,9 +244,25 @@ export class BallotAPI {
     return this.mode;
   }
 
+  // Runs an on-chain action; on port disconnect, rebuilds the API and retries once.
+  private async runOnChain<T>(fn: () => Promise<T>): Promise<T> {
+    try {
+      return await fn();
+    } catch (err) {
+      if (!isPortError(err) || !this.lastConnectedApi) throw err;
+      const fresh = await reconnectWallet();
+      if (!fresh) throw err;
+      this.lastConnectedApi = fresh;
+      const rebuilt = await OnChainBallotAPI.create(fresh).catch(() => null);
+      if (!rebuilt) throw err;
+      this.onChain = rebuilt;
+      return await fn();
+    }
+  }
+
   async getState(): Promise<BallotState> {
     if (this.mode === 'onchain' && this.onChain) {
-      return this.onChain.getState();
+      return this.runOnChain(() => this.onChain!.getState());
     }
     return this.simulated.getState();
   }
@@ -225,21 +273,21 @@ export class BallotAPI {
 
   async openBallot(proposal: string): Promise<void> {
     if (this.mode === 'onchain' && this.onChain) {
-      return this.onChain.openBallot(proposal);
+      return this.runOnChain(() => this.onChain!.openBallot(proposal));
     }
     return this.simulated.openBallot(proposal);
   }
 
   async castVote(vote: 'yes' | 'no'): Promise<void> {
     if (this.mode === 'onchain' && this.onChain) {
-      return this.onChain.castVote(vote);
+      return this.runOnChain(() => this.onChain!.castVote(vote));
     }
     return this.simulated.castVote(vote);
   }
 
   async closeBallot(): Promise<void> {
     if (this.mode === 'onchain' && this.onChain) {
-      return this.onChain.closeBallot();
+      return this.runOnChain(() => this.onChain!.closeBallot());
     }
     return this.simulated.closeBallot();
   }

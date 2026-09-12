@@ -17,6 +17,19 @@ export function isLaceAvailable(): boolean {
   return findLace() !== undefined;
 }
 
+// Re-acquire a fresh ConnectedAPI from the extension (used after port disconnect).
+export async function reconnectWallet(): Promise<ConnectedAPI | null> {
+  const lace = findLace();
+  if (!lace) return null;
+  const networks = ['testnet', 'preprod', 'preview', 'undeployed', 'mainnet'];
+  for (const network of networks) {
+    try {
+      return await lace.connect(network);
+    } catch {}
+  }
+  return null;
+}
+
 export async function connectWallet(): Promise<WalletInfo> {
   const lace = findLace();
   if (!lace) {
