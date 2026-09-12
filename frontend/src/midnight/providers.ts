@@ -123,11 +123,22 @@ export function buildMidnightProvider(connectedApi: ConnectedAPI): MidnightProvi
 
 export function buildPrivateStateProvider(): PrivateStateProvider<PrivateStateId, null> {
   const store = new Map<PrivateStateId, null>();
+  const signingKeys = new Map<string, unknown>();
+
   return {
+    setContractAddress: (_address: string) => {},
     get: async (id: PrivateStateId) => store.get(id) ?? null,
     set: async (id: PrivateStateId, state: null) => { store.set(id, state); },
     remove: async (id: PrivateStateId) => { store.delete(id); },
-    setContractAddress: async (_contractAddress: string) => {},
+    clear: async () => { store.clear(); },
+    getSigningKey: async (address: unknown) => signingKeys.get(String(address)) ?? null,
+    setSigningKey: async (address: unknown, key: unknown) => { signingKeys.set(String(address), key); },
+    removeSigningKey: async (address: unknown) => { signingKeys.delete(String(address)); },
+    clearSigningKeys: async () => { signingKeys.clear(); },
+    exportPrivateStates: async () => { throw new Error('exportPrivateStates not supported in browser session'); },
+    importPrivateStates: async () => { throw new Error('importPrivateStates not supported in browser session'); },
+    exportSigningKeys: async () => { throw new Error('exportSigningKeys not supported in browser session'); },
+    importSigningKeys: async () => { throw new Error('importSigningKeys not supported in browser session'); },
   } as unknown as PrivateStateProvider<PrivateStateId, null>;
 }
 
