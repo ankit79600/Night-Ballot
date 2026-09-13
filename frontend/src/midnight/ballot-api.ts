@@ -85,8 +85,6 @@ export class OnChainBallotAPI {
         const foundContract = await findDeployedContract(providers as any, {
           contractAddress: CONTRACT_ADDRESS as any,
           compiledContract: compiledContract as any,
-          privateStateId: 'ballot-private',
-          initialPrivateState: null,
         } as any);
 
         return new OnChainBallotAPI(foundContract, providers);
