@@ -21,7 +21,7 @@ export function isLaceAvailable(): boolean {
 export async function reconnectWallet(): Promise<ConnectedAPI | null> {
   const lace = findLace();
   if (!lace) return null;
-  const networks = ['testnet', 'preprod', 'preview', 'undeployed', 'mainnet'];
+  const networks = ['preview', 'preprod'];
   for (const network of networks) {
     try {
       return await lace.connect(network);
@@ -38,8 +38,8 @@ export async function connectWallet(): Promise<WalletInfo> {
     );
   }
 
-  // Try each network in order until one matches the wallet's current network
-  const networks = ['testnet', 'preprod', 'preview', 'undeployed', 'mainnet'];
+  // Try preview first (active network), then preprod as fallback
+  const networks = ['preview', 'preprod'];
   let connectedApi: ConnectedAPI | null = null;
 
   for (const network of networks) {
