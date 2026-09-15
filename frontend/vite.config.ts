@@ -8,8 +8,12 @@ export default defineConfig({
   plugins: [wasm(), topLevelAwait(), react()],
   envDir: path.resolve(__dirname, '..'),
   resolve: {
+    dedupe: ['@midnight-ntwrk/midnight-js-network-id'],
     alias: {
       '@contract': path.resolve(__dirname, '../src/managed/ballot/contract'),
     },
+  },
+  optimizeDeps: {
+    exclude: ['@midnight-ntwrk/midnight-js-network-id'],
   },
 });
