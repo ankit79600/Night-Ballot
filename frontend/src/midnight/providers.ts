@@ -6,6 +6,8 @@
  */
 
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
+import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
+import { Transaction } from '@midnight-ntwrk/ledger-v8';
 import {
   createProofProvider,
   ZKConfigProvider,
@@ -94,11 +96,13 @@ export async function buildWalletProvider(connectedApi: ConnectedAPI): Promise<W
       return shieldedEncryptionPublicKey as any;
     },
     async balanceTx(tx: any, ttl?: Date) {
-      const serialized = JSON.stringify(tx);
-      const { tx: balanced } = await connectedApi.balanceUnsealedTransaction(serialized, {
+      const { tx: balanced } = await connectedApi.balanceUnsealedTransaction(tx.toString(), {
         payFees: true,
       });
-      return JSON.parse(balanced);
+      // Response format: "midnight:transaction[v9](...):HEXDATA"
+      const hexData = balanced.split(':').pop()!;
+      const bytes = new Uint8Array(hexData.match(/.{1,2}/g)!.map((b: string) => parseInt(b, 16)));
+      return Transaction.deserialize('signature', 'proof', 'binding', bytes);
     },
   };
 }
@@ -110,9 +114,8 @@ export async function buildWalletProvider(connectedApi: ConnectedAPI): Promise<W
 export function buildMidnightProvider(connectedApi: ConnectedAPI): MidnightProvider {
   return {
     async submitTx(tx: any) {
-      const serialized = JSON.stringify(tx);
-      await connectedApi.submitTransaction(serialized);
-      return tx.hash ?? '' as any;
+      await connectedApi.submitTransaction(tx.toString());
+      return tx.identifiers()[0] as any;
     },
   };
 }
@@ -151,8 +154,9 @@ export async function buildMidnightProviders(
 ): Promise<MidnightProviders<CircuitId, PrivateStateId, null>> {
   const keyMaterialProvider = buildKeyMaterialProvider();
   const zkConfigProvider = buildZkConfigProvider(keyMaterialProvider);
-  const provingProvider = await connectedApi.getProvingProvider(keyMaterialProvider);
-  const proofProvider = createProofProvider(provingProvider as any);
+  const proverUrl = 'https://proof-server.preview.midnight.network';
+  console.log('[Night Ballot] Using proof server:', proverUrl);
+  const proofProvider = httpClientProofProvider(proverUrl, zkConfigProvider);
   const walletProvider = await buildWalletProvider(connectedApi);
   const midnightProvider = buildMidnightProvider(connectedApi);
   const publicDataProvider = indexerPublicDataProvider(INDEXER_URLS.query, INDEXER_URLS.ws);

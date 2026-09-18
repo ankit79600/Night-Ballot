@@ -8,7 +8,12 @@ export default defineConfig({
   plugins: [wasm(), topLevelAwait(), react()],
   envDir: path.resolve(__dirname, '..'),
   resolve: {
-    dedupe: ['@midnight-ntwrk/midnight-js-network-id'],
+    dedupe: [
+      '@midnight-ntwrk/midnight-js-network-id',
+      '@midnight-ntwrk/ledger-v8',
+      '@midnight-ntwrk/onchain-runtime-v3',
+      '@midnight-ntwrk/compact-runtime',
+    ],
     alias: {
       '@contract': path.resolve(__dirname, '../src/managed/ballot/contract'),
     },

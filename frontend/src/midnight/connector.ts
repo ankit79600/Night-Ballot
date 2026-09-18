@@ -21,13 +21,11 @@ export function isLaceAvailable(): boolean {
 export async function reconnectWallet(): Promise<ConnectedAPI | null> {
   const lace = findLace();
   if (!lace) return null;
-  const networks = ['preview', 'preprod'];
-  for (const network of networks) {
-    try {
-      return await lace.connect(network);
-    } catch {}
+  try {
+    return await lace.connect('preview');
+  } catch {
+    return null;
   }
-  return null;
 }
 
 export async function connectWallet(): Promise<WalletInfo> {
@@ -38,22 +36,18 @@ export async function connectWallet(): Promise<WalletInfo> {
     );
   }
 
-  // Try preview first (active network), then preprod as fallback
-  const networks = ['preview', 'preprod'];
-  let connectedApi: ConnectedAPI | null = null;
-
-  for (const network of networks) {
-    try {
-      connectedApi = await lace.connect(network);
-      break;
-    } catch {
-      // Try next network
-    }
+  let connectedApi: ConnectedAPI;
+  try {
+    connectedApi = await lace.connect('preview');
+  } catch (err) {
+    throw new Error(
+      'Could not connect to Midnight Preview network. ' +
+      'In your Lace wallet, go to Settings → Network and set Midnight to "Preview", then try again.',
+    );
   }
 
-  if (!connectedApi) {
-    throw new Error('Could not connect — check your Lace wallet network setting.');
-  }
+  const config = await connectedApi.getConfiguration().catch(() => null);
+  console.log('[Night Ballot] Lace wallet configuration:', config);
 
   const { shieldedAddress } = await connectedApi.getShieldedAddresses();
   return { address: shieldedAddress, connectedApi };
