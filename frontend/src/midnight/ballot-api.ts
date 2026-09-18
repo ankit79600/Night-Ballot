@@ -56,9 +56,10 @@ export class OnChainBallotAPI {
   private constructor(
     private readonly foundContract: any,
     private readonly providers: Awaited<ReturnType<typeof buildMidnightProviders>>,
+    readonly organizerKey: Uint8Array,
   ) {}
 
-  static async create(connectedApi: ConnectedAPI): Promise<OnChainBallotAPI> {
+  static async create(connectedApi: ConnectedAPI, organizerKey: Uint8Array): Promise<OnChainBallotAPI> {
     if (!CONTRACT_ADDRESS) {
       throw new Error(
         'No contract address configured. Set VITE_CONTRACT_ADDRESS in your .env file.',
@@ -72,13 +73,12 @@ export class OnChainBallotAPI {
       try {
         const providers = await buildMidnightProviders(api);
 
+        // organizerKey is captured by reference so the same compiled contract
+        // instance works for both openBallot (needs the key) and castYes/castNo
+        // (witness never called — harmless to supply).
         const compiledContract = (CompiledContract.make('ballot', Contract) as any).pipe(
           (CompiledContract.withWitnesses as any)({
-            organizerKey: (_ctx: unknown): [null, Uint8Array] => {
-              throw new Error(
-                'organizerKey witness called on voting-only circuit — not available in browser.',
-              );
-            },
+            organizerKey: (_ctx: unknown): [null, Uint8Array] => [null, organizerKey],
           }),
         );
 
@@ -87,7 +87,7 @@ export class OnChainBallotAPI {
           compiledContract: compiledContract as any,
         } as any);
 
-        return new OnChainBallotAPI(foundContract, providers);
+        return new OnChainBallotAPI(foundContract, providers, organizerKey);
       } catch (err) {
         lastErr = err;
         if (attempt < 2 && isPortError(err)) {
@@ -215,8 +215,10 @@ export class BallotAPI {
   private simulated: SimulatedBallotAPI;
   private mode: BallotMode;
   private lastConnectedApi: ConnectedAPI | null = null;
+  private readonly organizerKey: OrganizerKey;
 
   constructor(organizerKey: OrganizerKey) {
+    this.organizerKey = organizerKey;
     this.simulated = new SimulatedBallotAPI(organizerKey);
     this.mode = 'simulation';
   }
@@ -224,7 +226,7 @@ export class BallotAPI {
   async connectWallet(connectedApi: ConnectedAPI): Promise<void> {
     this.lastConnectedApi = connectedApi;
     try {
-      this.onChain = await OnChainBallotAPI.create(connectedApi);
+      this.onChain = await OnChainBallotAPI.create(connectedApi, this.organizerKey);
       this.mode = 'onchain';
     } catch (err) {
       this.mode = 'simulation';
@@ -251,7 +253,7 @@ export class BallotAPI {
       const fresh = await reconnectWallet();
       if (!fresh) throw err;
       this.lastConnectedApi = fresh;
-      const rebuilt = await OnChainBallotAPI.create(fresh).catch(() => null);
+      const rebuilt = await OnChainBallotAPI.create(fresh, this.organizerKey).catch(() => null);
       if (!rebuilt) throw err;
       this.onChain = rebuilt;
       return await fn();
