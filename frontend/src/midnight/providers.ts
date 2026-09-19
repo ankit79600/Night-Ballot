@@ -154,7 +154,9 @@ export async function buildMidnightProviders(
 ): Promise<MidnightProviders<CircuitId, PrivateStateId, null>> {
   const keyMaterialProvider = buildKeyMaterialProvider();
   const zkConfigProvider = buildZkConfigProvider(keyMaterialProvider);
-  const proverUrl = 'https://proof-server.preview.midnight.network';
+  // Use a same-origin Vercel proxy so the browser isn't blocked by CORS.
+  // In dev, fall back to a local proof server via VITE_PROOF_SERVER_URL.
+  const proverUrl = (import.meta as any).env?.VITE_PROOF_SERVER_URL ?? '/api/prove-proxy';
   console.log('[Night Ballot] Using proof server:', proverUrl);
   const proofProvider = httpClientProofProvider(proverUrl, zkConfigProvider);
   const walletProvider = await buildWalletProvider(connectedApi);
