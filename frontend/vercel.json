@@ -1,8 +1,5 @@
 {
   "rewrites": [
-    {
-      "source": "/api/prove-proxy/:path*",
-      "destination": "https://proof-server.preview.midnight.network/:path*"
-    }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
