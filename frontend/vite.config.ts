@@ -19,6 +19,7 @@ export default defineConfig({
     ],
     alias: {
       '@contract': path.resolve(__dirname, '../src/managed/ballot/contract'),
+      'isomorphic-ws': path.resolve(__dirname, 'node_modules/isomorphic-ws/browser.js'),
     },
   },
   optimizeDeps: {
