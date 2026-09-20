@@ -6,7 +6,6 @@
  */
 
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
-import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import { Transaction } from '@midnight-ntwrk/ledger-v8';
 import {
   createProofProvider,
@@ -154,11 +153,9 @@ export async function buildMidnightProviders(
 ): Promise<MidnightProviders<CircuitId, PrivateStateId, null>> {
   const keyMaterialProvider = buildKeyMaterialProvider();
   const zkConfigProvider = buildZkConfigProvider(keyMaterialProvider);
-  // Use a same-origin Vercel proxy so the browser isn't blocked by CORS.
-  // In dev, fall back to a local proof server via VITE_PROOF_SERVER_URL.
-  const proverUrl = (import.meta as any).env?.VITE_PROOF_SERVER_URL ?? '/api/prove-proxy';
-  console.log('[Night Ballot] Using proof server:', proverUrl);
-  const proofProvider = httpClientProofProvider(proverUrl, zkConfigProvider);
+  // Delegate proving to Lace — no external proof server needed in the browser.
+  const provingProvider = await connectedApi.getProvingProvider(keyMaterialProvider);
+  const proofProvider = createProofProvider(provingProvider);
   const walletProvider = await buildWalletProvider(connectedApi);
   const midnightProvider = buildMidnightProvider(connectedApi);
   const publicDataProvider = indexerPublicDataProvider(INDEXER_URLS.query, INDEXER_URLS.ws);
