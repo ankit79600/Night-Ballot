@@ -249,12 +249,36 @@ export async function buildWalletProvider(connectedApi: ConnectedAPI): Promise<W
       return shieldedEncryptionPublicKey as any;
     },
     async balanceTx(tx: any, _ttl?: Date) {
-      const { tx: balanced } = await connectedApi.balanceUnsealedTransaction(tx.toString(), {
-        payFees: true,
-      });
-      // Response format: "midnight:transaction[v9](...):HEXDATA"
-      const hexData = balanced.split(':').pop()!;
+      const txStr = tx.toString();
+      console.log('[Night Ballot] balanceTx: input tx.toString() prefix:', txStr.slice(0, 100));
+
+      const result = await connectedApi.balanceUnsealedTransaction(txStr, { payFees: true });
+      const balanced = result.tx;
+      console.log(
+        '[Night Ballot] balanceTx: balanceUnsealedTransaction result.tx type:', typeof balanced,
+        'prefix:', typeof balanced === 'string' ? balanced.slice(0, 100) : JSON.stringify(balanced),
+      );
+
+      if (typeof balanced !== 'string' || !balanced) {
+        throw new Error(
+          `balanceUnsealedTransaction returned unexpected result: ${JSON.stringify(result)}\n` +
+          `The wallet may not have sufficient tDUST to pay transaction fees.`,
+        );
+      }
+
+      // The result is the full transaction string: "midnight:transaction[v9]{...}:HEXDATA"
+      // Extract the hex-encoded binary payload after the last colon.
+      const colonIdx = balanced.lastIndexOf(':');
+      if (colonIdx === -1 || colonIdx === balanced.length - 1) {
+        throw new Error(
+          `balanceUnsealedTransaction returned a transaction string with no hex payload: ${balanced.slice(0, 200)}`,
+        );
+      }
+      const hexData = balanced.slice(colonIdx + 1);
+      console.log('[Night Ballot] balanceTx: hexData length:', hexData.length, 'first 20 chars:', hexData.slice(0, 20));
+
       const bytes = new Uint8Array(hexData.match(/.{1,2}/g)!.map((b: string) => parseInt(b, 16)));
+      console.log('[Night Ballot] balanceTx: bytes length:', bytes.length);
       return Transaction.deserialize('signature', 'proof', 'binding', bytes);
     },
   };
