@@ -19,7 +19,7 @@ import {
   ledger,
   type Ledger,
 } from '../contract/index.js';
-import { buildMidnightProviders } from './providers.js';
+import { buildMidnightProviders, checkZKAssets } from './providers.js';
 import { CONTRACT_ADDRESS } from './network.js';
 import { reconnectWallet } from './connector.js';
 
@@ -68,6 +68,11 @@ export class OnChainBallotAPI {
 
     let api = connectedApi;
     let lastErr: unknown;
+
+    // Pre-flight: verify all ZK key files are accessible before any network
+    // transaction.  This surfaces missing-file errors with a clear message
+    // instead of the generic ledger-WASM "TypeError: Failed to fetch".
+    await checkZKAssets();
 
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
